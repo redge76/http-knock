@@ -1,0 +1,24 @@
+version: '2'
+services:
+  http-knock:
+    build: .
+    container_name: https-knock
+    hostname: https-knock
+    image: 'https-knock:latest'
+    restart: unless-stopped
+    labels:
+       - "prod=true"
+       - "com.centurylinklabs.watchtower.enable=true"
+       - "traefik.enable=true"
+       - "traefik.http.routers.https-knock.entrypoints=websecure"
+       - "traefik.http.routers.https-knock.rule=Host(`knock2.redge.net`)"
+       - "traefik.http.services.https-knock.loadbalancer.server.port=5022"
+    network_mode: "host"
+    privileged: true
+    ports:
+      - 5022:5022
+    volumes:
+      - './config.ini:/config.ini'
+      - '/var/log/http-knock.log:/var/log/http-knock.log'
+    extra_hosts: 
+      - host.docker.internal:172.17.0.1

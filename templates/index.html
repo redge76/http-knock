@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+	<head>
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+	</head>
+   <body>
+		<CENTER>
+			<img src="static/knock.jpg"> 
+			<h1>Your IP is {{ IP }}</h1>
+			
+			{% if found %}
+			<H2>Access was already granted</H2>
+			{% else %}
+			<H2>Your IP has been added to the approved list</H2>
+			{% endif %}
+
+		<BR>
+
+		<DIV style="display: inline-block;">
+		<SPAN style="font-size: 150%;" >Last connection activity:</span>
+		<BR><BR>
+		<table border=1 cellpadding=5>
+		  <tr> <th> Time  </th> <th> IP  </th> <th> Hostname </th> </tr>
+		{% for (time, ip, hostname) in last_conn %}
+		  <tr> <td>{{ time }} </td> <td>{{ ip }} </td> <td>{{ hostname}} </td> </tr>
+		{% endfor %}
+		</table>
+		</DIV>
+
+		</CENTER>
+	<BR><BR>
+
+{% if debug %}
+	<H5>Headers </H5>
+	<pre>
+		{{headers}}
+	</pre>      
+
+	<H5>Request</H5>
+	<pre>
+		{{request}}
+	</pre>      
+{% endif %}
+
+   </body>
+</html>
