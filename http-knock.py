@@ -87,23 +87,24 @@ def root_page():
         if request.access_route[0] in rule:
             found = True
 
-    if found == False:
+    if (found is False):
         logger.info("Adding IP to allowed list: %s", request.access_route[0])
         iptables_add_ip_allowed_rules(request.access_route[0])
-
-    last_failed_connction_attempts = subprocess.run("tail -n %s %s | sed -n 's/\\(.* ..:..:..\\) .*SRC=\\(.*\\) DST.*/\\1,\\2/p'" %(cfg['global']['connection_attempt_number'], cfg['global']['iptables_logfile']) , capture_output = True, shell = True, text = True).stdout.splitlines()
-   
+    
     last_conn_hostname = list()
-    for attempt in last_failed_connction_attempts:
-         try:
-            (time, ip) = tuple(attempt.split(','))
-            hostname = socket.gethostbyaddr(ip)[0]
-         except OSError as e:
-            hostname = "Error: %s" %(e.strerror)
-       
-         last_conn_hostname.append( (time, ip, hostname) )
+    if (cfg.getboolean('global','activity_enable')):
+        last_failed_connction_attempts = subprocess.run("tail -n %s %s | sed -n 's/\\(.* ..:..:..\\) .*SRC=\\(.*\\) DST.*/\\1,\\2/p'" %(cfg['global']['activity_size'], cfg['global']['activity_logfile'] ) , capture_output = True, shell = True, text = True).stdout.splitlines()
+    
+        for attempt in last_failed_connction_attempts:
+             try:
+                (time, ip) = tuple(attempt.split(','))
+                hostname = socket.gethostbyaddr(ip)[0]
+             except OSError as e:
+                hostname = "Error: %s" %(e.strerror)
+           
+             last_conn_hostname.append( (time, ip, hostname) )
   
-    return render_template('index.html', IP = request.access_route[0], found = found, debug = args.debug , headers = request.headers, request = vars(request), last_conn = last_conn_hostname)
+    return render_template('index.html', IP = request.access_route[0], found = found, debug = args.debug , headers = request.headers, request = vars(request), activity_enable=cfg.getboolean('global','activity_enable') ,last_conn = last_conn_hostname)
 
 def parse_args():
 
